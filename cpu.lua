@@ -10,8 +10,8 @@ validate = file:readObject()
 file:close()
 
 -- build dicts
-print("facies size: ", facies:size()[1], "x", facies:size()[2])
-print("validate size: ", validate:size()[1], "x", validate:size()[2])
+--print("facies size: ", facies:size()[1], "x", facies:size()[2])
+--print("validate size: ", validate:size()[1], "x", validate:size()[2])
 
 	-- initialize
 training_data = {}
@@ -108,12 +108,15 @@ facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
 net = nn.Sequential()
+net:add(nn.Linear(7,20))
 net:add(nn.Tanh())
-net:add(nn.LogSoftMax())
+net:add(nn.Linear(20,9))
+net:add(nn.Tanh())
+--net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
 
 -- test the net -> forward
-temp = torch.Tensor(7,1)
+temp = torch.Tensor(7)
 for i = 1,7 do
     temp[i] = training_data["shrimplin"][1][i]
 end
@@ -121,7 +124,8 @@ input = temp
 
 output = net:forward(input)
 
-print("forward output =\n", output)
+--print("forward output =\n", output)
+--print("correct facies = ", facies_labels["shrimplin"][1])
 
 -- calibrate gradient parameters
 net:zeroGradParameters()
@@ -129,20 +133,22 @@ net:zeroGradParameters()
 gradInput = net:backward(input, torch.rand(9))
 
 -- define the loss function
-criterion = nn.ClassNLLCriterion()
+criterion = nn.CrossEntropyCriterion()
 
 criterion:forward(output,facies_labels["shrimplin"][1])
+--print(criterion:forward(output,facies_labels["shrimplin"][1]))
 
 gradients = criterion:backward(output, facies_labels["shrimplin"][1])
-print("gradients = ", gradients)
+--print("gradients = ", gradients)
 
 gradInput = net:backward(input, gradients)
+print(gradInput)
 
 -- condition the data
 trainset = {}
 
 	-- the data
-trainset["data"] = torch.Tensor(facies:size()[1]-blind_well["newby"]:size()[1],7,1) 
+trainset["data"] = torch.Tensor(facies:size()[1]-blind_well["newby"]:size()[1],7) 
 
 idx = 0
 for key,value in pairs(training_data) do
@@ -177,7 +183,7 @@ end
 
 -- train the net
 trainer = nn.StochasticGradient(net, criterion)
-trainer.learningRate = 0.001
+trainer.learningRate = 0.00001
 trainer.maxIteration = 10
 
 print("starting training")
@@ -190,7 +196,7 @@ print("training time =", timer:time().real)
 testset = {}
 
 	-- the data
-testset["data"] = torch.Tensor(blind_well["newby"]:size()[1],7,1) 
+testset["data"] = torch.Tensor(blind_well["newby"]:size()[1],7) 
 
 for i = 1,blind_well["newby"]:size()[1] do
     testset["data"][i] = blind_well["newby"][i]
