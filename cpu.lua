@@ -109,9 +109,11 @@ facies_labels["newby"] = nil
 -- build the neural net ----------------------------------------
 net = nn.Sequential()
 net:add(nn.Linear(7,20))
-net:add(nn.Tanh())
+--net:add(nn.Tanh())
+net:add(nn.Sigmoid())
 net:add(nn.Linear(20,9))
-net:add(nn.Tanh())
+--net:add(nn.Tanh())
+net:add(nn.Sigmoid())
 --net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
 
@@ -122,7 +124,7 @@ for i = 1,7 do
 end
 input = temp
 
-print(input)
+--print(input)
 
 output = net:forward(input)
 
@@ -185,8 +187,8 @@ end
 
 -- train the net
 trainer = nn.StochasticGradient(net, criterion)
-trainer.learningRate = 0.00001
-trainer.maxIteration = 10
+trainer.learningRate = 0.0001
+trainer.maxIteration = 5
 
 print("starting training")
 timer = torch.Timer()
