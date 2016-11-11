@@ -106,21 +106,11 @@ blind_labels["newby"] = facies_labels["newby"][{{},{}}]
 
 facies_labels["newby"] = nil
 
--- build the neural net
+-- build the neural net ----------------------------------------
 net = nn.Sequential()
-net:add(nn.TemporalConvolution(1,3,2))
-net:add(nn.ReLU())
-net:add(nn.TemporalMaxPooling(2))
-net:add(nn.TemporalConvolution(3,5,2))
-net:add(nn.ReLU())
-net:add(nn.TemporalMaxPooling(2))
-net:add(nn.View(5*1))
-net:add(nn.Linear(5*1,20))
-net:add(nn.ReLU())
-net:add(nn.Linear(20,10))
-net:add(nn.ReLU())
-net:add(nn.Linear(10,9))
+net:add(nn.Tanh())
 net:add(nn.LogSoftMax())
+----------------------------------------------------------------
 
 -- test the net -> forward
 temp = torch.Tensor(7,1)
@@ -131,7 +121,7 @@ input = temp
 
 output = net:forward(input)
 
-print("forward output =", output)
+print("forward output =\n", output)
 
 -- calibrate gradient parameters
 net:zeroGradParameters()
@@ -193,7 +183,7 @@ trainer.maxIteration = 10
 print("starting training")
 timer = torch.Timer()
 trainer:train(trainset)
-print("training time =", timer:time().real))
+print("training time =", timer:time().real)
 
 -- predict using the net
 	-- condition the testing data
