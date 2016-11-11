@@ -109,13 +109,14 @@ facies_labels["newby"] = nil
 -- build the neural net ----------------------------------------
 net = nn.Sequential()
 net:add(nn.Linear(7,20))
---net:add(nn.Tanh())
+net:add(module)
 net:add(nn.Sigmoid())
 net:add(nn.Linear(20,9))
---net:add(nn.Tanh())
 net:add(nn.Sigmoid())
 --net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
+
+print(module.weight)
 
 -- test the net -> forward
 temp = torch.Tensor(7)
@@ -124,9 +125,13 @@ for i = 1,7 do
 end
 input = temp
 
---print(input)
+--print("input = ", input)
+
+print("\n weight me baby \n")
 
 output = net:forward(input)
+
+print("\n AND then \n")
 
 --print("forward output =\n", output)
 --print("correct facies = ", facies_labels["shrimplin"][1])
@@ -140,13 +145,13 @@ gradInput = net:backward(input, torch.rand(9))
 criterion = nn.CrossEntropyCriterion()
 
 criterion:forward(output,facies_labels["shrimplin"][1])
---print(criterion:forward(output,facies_labels["shrimplin"][1]))
+--print("criterion:forward = ", criterion:forward(output,facies_labels["shrimplin"][1]))
 
 gradients = criterion:backward(output, facies_labels["shrimplin"][1])
 --print("gradients = ", gradients)
 
 gradInput = net:backward(input, gradients)
---print(gradInput)
+--print("gradInput =", gradInput)
 
 -- condition the data
 trainset = {}
@@ -187,7 +192,7 @@ end
 
 -- train the net
 trainer = nn.StochasticGradient(net, criterion)
-trainer.learningRate = 0.0001
+trainer.learningRate = .001
 trainer.maxIteration = 5
 
 print("starting training")
