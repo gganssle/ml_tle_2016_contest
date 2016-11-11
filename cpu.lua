@@ -122,6 +122,8 @@ for i = 1,7 do
 end
 input = temp
 
+print(input)
+
 output = net:forward(input)
 
 --print("forward output =\n", output)
@@ -142,7 +144,7 @@ gradients = criterion:backward(output, facies_labels["shrimplin"][1])
 --print("gradients = ", gradients)
 
 gradInput = net:backward(input, gradients)
-print(gradInput)
+--print(gradInput)
 
 -- condition the data
 trainset = {}
