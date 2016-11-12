@@ -1,3 +1,8 @@
+--[[ this script was used for testing the weights and biases in the
+	hidden layer of the neural network. It's development was
+	discontinued on 20161112 after I figured out the NaN problem
+	I was having in my data ]]--
+
 -- deps
 require 'nn'
 
@@ -107,12 +112,13 @@ blind_labels["newby"] = facies_labels["newby"][{{},{}}]
 facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
-mod = nn.Linear(7,20)
+mod = nn.Linear(20,9)
 
 net = nn.Sequential()
-net:add(mod)
+net:add(nn.Linear(7,20))
 net:add(nn.Sigmoid())
-net:add(nn.Linear(20,9))
+--net:add(nn.Linear(20,9))
+net:add(mod)
 net:add(nn.Sigmoid())
 --net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
@@ -188,10 +194,15 @@ function trainset:size()
     return self.data:size(1) 
 end
 
+-- eliminate NaNs
+nan_mask = trainset.data:ne(trainset.data)
+trainset.data[nan_mask] = 0
+
 -- train the net
 print("starting training")
 timer = torch.Timer()
 for i = 1,trainset:size() do
+--for i = 1,1350 do
 	local input= trainset.data[i]
 	local output= trainset.facies[i]
 
@@ -205,8 +216,14 @@ for i = 1,trainset:size() do
 	net:backward(input, criterion:backward(net.output, output))
 	-- (3) update parameters with a 0.01 learning rate
 	net:updateParameters(0.01)
+	print("\n Feature Vector # ", i,"\n")
+	print("\n", mod.weight, "\n")
+	print("\n", mod.bias, "\n")
 end
 print("training time =", timer:time().real)
+
+print("feature vector 1348 .data =", trainset.data[1348])
+print("feature vector 1348 .facies =", trainset.facies[1348])
 
 -- predict using the net
 	-- condition the testing data

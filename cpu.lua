@@ -107,18 +107,13 @@ blind_labels["newby"] = facies_labels["newby"][{{},{}}]
 facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
-mod = nn.Linear(7,20)
-
 net = nn.Sequential()
-net:add(mod)
-net:add(nn.Sigmoid())
-net:add(nn.Linear(20,9))
-net:add(nn.Sigmoid())
---net:add(nn.LogSoftMax())
+net:add(nn.Linear(7,20000))
+net:add(nn.Tanh())
+net:add(nn.Linear(20000,9))
+net:add(nn.Tanh())
+net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
-
-print("\n", mod.weight, "\n")
-print("\n", mod.bias, "\n")
 
 -- test the net -> forward
 temp = torch.Tensor(7)
@@ -127,12 +122,7 @@ for i = 1,7 do
 end
 input = temp
 
---print("input = ", input)
-
 output = net:forward(input)
-
---print("forward output =\n", output)
---print("correct facies = ", facies_labels["shrimplin"][1])
 
 -- calibrate gradient parameters
 net:zeroGradParameters()
@@ -140,16 +130,13 @@ net:zeroGradParameters()
 gradInput = net:backward(input, torch.rand(9))
 
 -- define the loss function
-criterion = nn.CrossEntropyCriterion()
+criterion = nn.ClassNLLCriterion()
 
 criterion:forward(output,facies_labels["shrimplin"][1])
---print("criterion:forward = ", criterion:forward(output,facies_labels["shrimplin"][1]))
 
 gradients = criterion:backward(output, facies_labels["shrimplin"][1])
---print("gradients = ", gradients)
 
 gradInput = net:backward(input, gradients)
---print("gradInput =", gradInput)
 
 -- condition the data
 trainset = {}
@@ -188,10 +175,14 @@ function trainset:size()
     return self.data:size(1) 
 end
 
+-- eliminate NaNs
+nan_mask = trainset.data:ne(trainset.data)
+trainset.data[nan_mask] = 0
+
 -- train the net
 trainer = nn.StochasticGradient(net, criterion)
 trainer.learningRate = .001
-trainer.maxIteration = 5
+trainer.maxIteration = 20
 
 print("starting training")
 timer = torch.Timer()
