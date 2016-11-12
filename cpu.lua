@@ -107,16 +107,18 @@ blind_labels["newby"] = facies_labels["newby"][{{},{}}]
 facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
+mod = nn.Linear(7,20)
+
 net = nn.Sequential()
-net:add(nn.Linear(7,20))
-net:add(module)
+net:add(mod)
 net:add(nn.Sigmoid())
 net:add(nn.Linear(20,9))
 net:add(nn.Sigmoid())
 --net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
 
-print(module.weight)
+print("\n", mod.weight, "\n")
+print("\n", mod.bias, "\n")
 
 -- test the net -> forward
 temp = torch.Tensor(7)
@@ -127,11 +129,7 @@ input = temp
 
 --print("input = ", input)
 
-print("\n weight me baby \n")
-
 output = net:forward(input)
-
-print("\n AND then \n")
 
 --print("forward output =\n", output)
 --print("correct facies = ", facies_labels["shrimplin"][1])
