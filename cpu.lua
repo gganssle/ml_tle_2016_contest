@@ -108,9 +108,9 @@ facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
 net = nn.Sequential()
-net:add(nn.Linear(7,20000))
+net:add(nn.Linear(7,200))
 net:add(nn.Tanh())
-net:add(nn.Linear(20000,9))
+net:add(nn.Linear(200,9))
 net:add(nn.Tanh())
 net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
@@ -220,18 +220,18 @@ end
 -- calculate the accuracy
 correct = 0
 for i=1,testset:size() do
-    local groundtruth = testset.label[i]
+    local groundtruth = testset.facies[i]
     local prediction = net:forward(testset.data[i])
     local confidences, indices = torch.sort(prediction, true)
     if groundtruth == indices[1] then
         correct = correct + 1
     end
 end
-print("correct: ", correct, 100*correct/testset:size() .. ' % ')
+print("\ncorrect: ", correct, 100*correct/testset:size() .. ' % \n')
 
 class_performance = {0, 0, 0, 0, 0, 0, 0, 0, 0}
 for i=1,testset:size() do
-    local groundtruth = testset.label[i]
+    local groundtruth = testset.facies[i]
     local prediction = net:forward(testset.data[i])
     local confidences, indices = torch.sort(prediction, true)
     if groundtruth == indices[1] then
