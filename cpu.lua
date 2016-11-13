@@ -108,9 +108,9 @@ facies_labels["newby"] = nil
 
 -- build the neural net ----------------------------------------
 net = nn.Sequential()
-net:add(nn.Linear(7,200))
+net:add(nn.Linear(7,20000))
 net:add(nn.Tanh())
-net:add(nn.Linear(200,9))
+net:add(nn.Linear(20000,9))
 net:add(nn.Tanh())
 net:add(nn.LogSoftMax())
 ----------------------------------------------------------------
