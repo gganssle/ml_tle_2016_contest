@@ -181,7 +181,7 @@ trainset.data[nan_mask] = 0
 
 -- train the net
 trainer = nn.StochasticGradient(net, criterion)
-trainer.learningRate = .001
+trainer.learningRate = .0001
 trainer.maxIteration = 20
 
 print("starting training")
@@ -235,6 +235,19 @@ for i = 1,testset.facies:size()[1] do
     counts[temp] = counts[temp] + 1
 end
 --print(counts)
+
+classes = {'SS', 'CSiS', 'FSiS', 'SiSh', 'MS', 'WS', 'D', 'PS', 'BS'}
+
+class_performance = {0,0,0,0,0,0,0,0,0}
+
+for i = 1, testset:size() do
+	local groundtruth = testset.facies[i]
+	local prediction = net:forward(testset.data[i])
+	local confidences, indices = torch.sort(prediction, true)
+	if groundtruth == indices[1] then
+		class_performance[groundtruth] = class_performance[groundtruth] + 1
+	end
+end
 
 for i = 1, #classes do
     print(classes[i], torch.round(100 * class_performance[i] / counts[i]) .. ' %')
