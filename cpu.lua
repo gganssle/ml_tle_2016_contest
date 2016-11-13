@@ -229,17 +229,13 @@ for i=1,testset:size() do
 end
 print("\ncorrect: ", correct, 100*correct/testset:size() .. ' % \n')
 
-class_performance = {0, 0, 0, 0, 0, 0, 0, 0, 0}
-for i=1,testset:size() do
-    local groundtruth = testset.facies[i]
-    local prediction = net:forward(testset.data[i])
-    local confidences, indices = torch.sort(prediction, true)
-    if groundtruth == indices[1] then
-        class_performance[groundtruth] = class_performance[groundtruth] + 1
-    end
+counts = {0,0,0,0,0,0,0,0,0}
+for i = 1,testset.facies:size()[1] do
+    temp = testset.facies[i]
+    counts[temp] = counts[temp] + 1
 end
-classes = {'SS','CSiS','FSiS','SiSh','MS','WS','D','PS','BS'}
-for i=1,#classes do
-    print(classes[i], 100*class_performance[i]/1000 .. ' %')
-end
+--print(counts)
 
+for i = 1, #classes do
+    print(classes[i], torch.round(100 * class_performance[i] / counts[i]) .. ' %')
+end
